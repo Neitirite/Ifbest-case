@@ -1,9 +1,13 @@
+var res: String? = null
 fun main() {
-    var videoFile = "/home/neitirite/Документы/Kotlin-Video-Backend/spokoynaya_noch"
-    val sourceRes = Pair(1920, 1080)
-    val ID = "first"
-//    startConversion(videoFile, sourceRes, ID)
+
     APIIntegration().startAPI()
+}
+
+
+
+fun processApiData(data: String){
+    res = Parser().parse(data)
 }
 
 fun startConversion(videoFile: String, sourceRes: Pair<Int, Int>, id: String){
@@ -19,10 +23,8 @@ fun startConversion(videoFile: String, sourceRes: Pair<Int, Int>, id: String){
     )
     resolutions.forEach{ (label, dims) ->
         if(dims.first <= sourceRes.first && dims.second <= sourceRes.second){
-            converter().convert(videoFile, label, dims.first, dims.second, id)
+            Converter().convert(videoFile, label, dims.first, dims.second, id)
         }
     }
 }
-fun parseData(){
 
-}

@@ -1,5 +1,5 @@
 import java.io.File
-class converter {
+class Converter {
 
     val outputDir = "/video_files"
 

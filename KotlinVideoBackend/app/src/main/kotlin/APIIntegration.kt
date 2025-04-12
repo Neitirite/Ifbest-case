@@ -5,10 +5,13 @@ import io.ktor.server.plugins.*
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
+import java.util.UUID
 class APIIntegration {
-    public fun startAPI(){
+    fun startAPI(){
 
         embeddedServer(Netty, port = 2077){
             install(WebSockets){
@@ -30,14 +33,14 @@ class APIIntegration {
                                         println("EOF received")
                                         break
                                     }
-                                    println("JSON: $text")
+                                    processApiData(text)
+//                                    println("JSON: $text")
                                 }
                                 is Frame.Binary -> {
                                     val chunk = frame.data
                                     binaryChunks.add(chunk)
-                                    println("Received ${chunk.size} bytes chunk")
+//                                    println("Received ${chunk.size} bytes chunk")
                                 }
-
                                 else -> {
                                     continue
                                 }
@@ -46,10 +49,13 @@ class APIIntegration {
                         if (binaryChunks.isNotEmpty()) {
                             println("Exporting video")
                             val allBytes = binaryChunks.fold(ByteArray(0)) {acc, bytes -> acc + bytes}
-                            File("received_video").writeBytes(allBytes)
+                            withContext(Dispatchers.IO) {
+                                val outVideo = File("/video_files/source/${UUID.randomUUID()}")
+                                outVideo.writeBytes(allBytes)
+
+                            }
                             println("Success!")
-                        } else {
-                            println("No binary data")
+
                         }
 
                     } catch (e: Exception) {

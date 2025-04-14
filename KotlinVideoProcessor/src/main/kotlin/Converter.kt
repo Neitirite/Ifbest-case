@@ -13,7 +13,7 @@ class Converter {
         "144" to Pair(256, 144)
     )
 
-    fun convert(videoFile: String, res: Pair<Int, Int>, id: String){
+    fun convert(videoFile: String, res: Pair<Int, Int>, id: String): Int {
 
         val fileName = File(videoFile).name.split(".")[0]
         val createDirectory = listOf("mkdir", "${outputDir}/${id}")
@@ -47,7 +47,7 @@ class Converter {
             )
 
             if (dims.first <= res.first && dims.second <= res.second) {
-                println("Start conversion of $label")
+                println("Start conversion of ${id}_${label}")
                 try {
                     val process = ProcessBuilder(ffmpegCommand)
                         .redirectErrorStream(true)
@@ -66,6 +66,6 @@ class Converter {
                 }
             }
         }
-        QueueManager().removeFromQueue()
+        return 0
     }
 }

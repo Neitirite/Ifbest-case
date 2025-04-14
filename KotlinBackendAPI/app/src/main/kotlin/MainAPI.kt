@@ -44,13 +44,11 @@ fun main() {
                                     id = parsedText.Info.id
                                     width = parsedText.Info.width
                                     height = parsedText.Info.height
-//                                    println("JSON: $text")
                                 }
                             }
                             is Frame.Binary -> {
                                 val chunk = frame.data
                                 binaryChunks.add(chunk)
-//                                    println("Received ${chunk.size} bytes chunk")
                             }
                             else -> {
                                 continue

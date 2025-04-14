@@ -36,6 +36,9 @@ fun main() {
                                 if (text == "EOF"){
                                     println("EOF received")
                                     break
+                                } else if (text == "getQueue") {
+                                    val q = Parser().getQueue()
+                                    send(q)
                                 } else {
                                     val parsedText = Parser().parse(text)
                                     id = parsedText.Info.id
@@ -62,7 +65,7 @@ fun main() {
                                 val outVideo = File("/video_files/source/${id}")
                                 outVideo.writeBytes(allBytes)
                                 println("Success! Adding to queue")
-                                QueueManager().addToQueue(id, width, height)
+                                thread(name = "converter"){QueueManager().addToQueue(id, width, height)}
                             } else {
                                 println("Error: No metadata found!")
                             }

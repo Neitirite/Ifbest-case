@@ -12,6 +12,6 @@ docker run \
    -e "MINIO_ROOT_PASSWORD=YourRootPassword" \
    quay.io/minio/minio server /data --console-address ":9001"
 ```
-2. Перейдите по ссылке `http://ip:9000` и войдите в аккаунт. Перейдите в пункт `Access keys` и создайте новый ключ. Сохраните Access Key и Secret Key, они потребуются в будущем
+2. Перейдите по ссылке `http://ваш-ip:9000` и войдите в аккаунт. Перейдите в пункт `Access keys` и создайте новый ключ. Сохраните Access Key и Secret Key, они потребуются в будущем
 
 ### 2. Установка бэкенда

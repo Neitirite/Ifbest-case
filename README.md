@@ -1,6 +1,6 @@
 # IfBest-Case
 ## Установка
-### 1.Установка MiniO
+### 1. Установка MiniO
 1. Разверните в Docker хранилище MiniO:
 ```
 docker run \

@@ -119,7 +119,14 @@ def upload():
         user_login = session.get('username', 'guest')
         original_name = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], original_name)
-        file.save(filepath)
+
+        # Используем потоковую запись, чтобы избежать загрузки всего файла в память
+        with open(filepath, 'wb') as f:
+            while True:
+                chunk = file.stream.read(config.CHUNK)  # Читаем файл небольшими кусками
+                if not chunk:
+                    break
+                f.write(chunk)
 
         data_to_request = {"login": f"{user_login}", "original_name": f"{original_name}"}
         response = requests.post(f"{config.URL_API}/video_uploaded", json=data_to_request)

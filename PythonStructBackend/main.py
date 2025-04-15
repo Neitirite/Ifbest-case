@@ -1,5 +1,5 @@
 import os
-
+import json
 from flask import Flask, request, jsonify
 import mysql.connector
 import datetime
@@ -22,6 +22,79 @@ conn = mysql.connector.connect(
     database=os.getenv("DB_DATABASE")
 )
 
+coefficients = {
+    "256x144": 1,
+    "320x240": 2,
+    "640x360": 3,
+    "854x480": 4,
+    "1280x720": 5,
+    "1920x1080": 6,
+    "2560x1440": 7,
+    "3840×2160": 8
+}
+
+
+class WebsocketClient:
+    def __init__(self, path_to_video, video_id):
+        self.path_to_video = path_to_video
+        self.video_id = str(video_id)
+
+    def get_queue(self):
+        servers_load = {}
+        for server in config.WEBSOCKET_SERVERS:
+            servers_load[server] = []
+            ws = websocket.WebSocket()
+            ws.connect(server)
+
+            ws.send("getQueue")
+            response = ws.recv()
+
+            data = json.loads(response)
+
+            for id_video, extension in data.items():
+                servers_load[server].append(extension)
+
+            ws.close()
+        return servers_load
+
+    def load_balancing(self):
+        server_total_coeff = {}
+        servers_load = self.get_queue()
+
+        for server, extensions in servers_load.items():
+            server_total_coeff[server] = 0
+            for extension in extensions:
+                server_total_coeff[server] += coefficients[extension]
+
+        print(server_total_coeff)
+        self.send_data(min(server_total_coeff))
+
+    def send_data(self, ws_server):
+        resolution = get_video_resolution(self.path_to_video)
+        if resolution:
+            width, height = resolution
+            message = json.dumps({"Info": {"width": width, "height": height, "id": self.video_id}})
+
+            # Устанавливаем соединение с WebSocket сервером
+            ws = websocket.WebSocket()
+            ws.connect(ws_server)
+            # Отправляем сообщение
+            ws.send(message)
+
+            print("Отправлено сообщение:", message)
+            with open(self.path_to_video, 'rb') as file:
+                while True:
+                    data = file.read(config.CHUNK)
+                    if not data:
+                        break
+                    ws.send(data, websocket.ABNF.OPCODE_BINARY)
+            ws.send(b'EOF')
+
+            # Закрываем соединение
+            ws.close()
+        else:
+            print("Не удалось получить разрешение видео.")
+
 
 def get_video_resolution(video_path):
     # Открываем видеофайл
@@ -37,34 +110,6 @@ def get_video_resolution(video_path):
 
     cap.release()
     return width, height
-
-
-def send_data(original_video_name, video_id):
-    video_path = f"{config.UPLOAD_FOLDER}/{original_video_name}"
-    resolution = get_video_resolution(video_path)
-    if resolution:
-        width, height = resolution
-        message = json.dumps({"Info": {"width": width, "height": height, "id": str(video_id)}})
-
-        # Устанавливаем соединение с WebSocket сервером
-        ws = websocket.WebSocket()
-        ws.connect(config.WEBSOCKET_SERVER)
-        # Отправляем сообщение
-        ws.send(message)
-
-        print("Отправлено сообщение:", message)
-        with open(video_path, 'rb') as file:
-            while True:
-                data = file.read(config.CHUNK)
-                if not data:
-                    break
-                ws.send(data, websocket.ABNF.OPCODE_BINARY)
-        ws.send(b'EOF')
-
-        # Закрываем соединение
-        ws.close()
-    else:
-        print("Не удалось получить разрешение видео.")
 
 
 def user_exist(login):
@@ -153,7 +198,10 @@ def video_uploaded():
             "INSERT INTO ID_video_Original_name (video_id, user_login, original_video_name) VALUES (%s, %s, %s)",
             (int(video_id), user_login, original_name))
         conn.commit()
-        send_data(original_name, video_id)
+
+        ws = WebsocketClient(f"{config.UPLOAD_FOLDER}/{original_name}", video_id)
+        ws.load_balancing()
+
         return jsonify({"message": "Фух, передали"}), 200
 
     except mysql.connector.Error as err:

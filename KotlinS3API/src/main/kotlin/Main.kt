@@ -29,6 +29,9 @@ fun main() {
     val config = Properties()
     val videoDirectory = File("/video_files")
     val s3qFile = File("/video_files/queue/s3queue")
+    if(!s3qFile.exists()){
+        s3qFile.createNewFile()
+    }
     if (configFile.exists() && configFile.isFile) {
         try {
             config.putAll(loadConfig(configFile))

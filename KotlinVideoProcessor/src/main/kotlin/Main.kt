@@ -7,8 +7,12 @@ fun main() {
     if(!s3qFile.exists()){
         s3qFile.createNewFile()
     }
+    if (!qFile.exists()) {
+        qFile.createNewFile()
+    }
     println("QueueManager running...")
     while (true) {
+
         val queue = qFile.readLines().toMutableList()
         val s3Queue = s3qFile.readLines().toMutableList()
         if (queue.isNotEmpty()) {

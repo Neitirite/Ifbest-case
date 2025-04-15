@@ -1,3 +1,5 @@
+package com.Neitirite
+
 import java.io.File
 
 val qFile = File("/video_files/queue/queue")
@@ -22,7 +24,7 @@ fun main() {
             val width = meta[1].toInt()
             val height = meta[2].toInt()
             println("Starting conversion")
-            val conv = Converter().convert("${videoDirectory}/${id}", Pair(width, height), id)
+            val conv = Converter().convert("$videoDirectory/${id}", Pair(width, height), id)
             if(conv == 0){
                 queue.remove(queue.first())
                 qFile.writeText(queue.joinToString("\n"))

@@ -1,3 +1,5 @@
+package com.Neitirite
+
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -63,7 +65,7 @@ fun main() {
                                 val outVideo = File("/video_files/source/${id}")
                                 outVideo.writeBytes(allBytes)
                                 println("Success! Adding to queue")
-                                thread(name = "converter"){QueueManager().addToQueue(id, width, height)}
+                                thread(name = "converter"){ QueueManager().addToQueue(id, width, height)}
                             } else {
                                 println("Error: No metadata found!")
                             }

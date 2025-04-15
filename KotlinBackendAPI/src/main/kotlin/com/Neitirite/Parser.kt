@@ -1,6 +1,7 @@
+package com.Neitirite
+
 import com.google.gson.Gson
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.File
 

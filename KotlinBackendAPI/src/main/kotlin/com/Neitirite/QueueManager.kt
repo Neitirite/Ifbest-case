@@ -1,4 +1,5 @@
-import kotlin.concurrent.thread
+package com.Neitirite
+
 import java.io.File
 val qFile = File("/video_files/queue/queue")
 

@@ -1,4 +1,4 @@
-/* Общий сброс и базовая типографика */
+/* Сброс и базовая типографика */
 
 {
     box-sizing: border-box
@@ -9,6 +9,23 @@
 ;
 }
 
+/* Анимация появления */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Присваиваем анимацию контейнеру */
+.animated {
+    animation: fadeInUp 0.8s ease-out;
+}
+
 body {
     font-family: 'Open Sans', sans-serif;
     background-color: #181818;
@@ -17,7 +34,7 @@ body {
     padding: 40px 20px;
 }
 
-/* Центральный контейнер для страниц */
+/* Центральный контейнер */
 .container {
     max-width: 600px;
     margin: auto;
@@ -43,12 +60,13 @@ body {
     text-decoration: none;
     border-radius: 4px;
     font-size: 14px;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
     margin-left: 8px;
 }
 
 .auth-button:hover {
     background: #93211f;
+    transform: translateY(-2px);
 }
 
 .user-info {
@@ -72,7 +90,7 @@ h2 {
     align-items: center;
 }
 
-/* Кастомизированная кнопка "Обзор файлов" */
+/* Кастомизированная кнопка для input */
 .custom-file-upload {
     display: inline-block;
     cursor: pointer;
@@ -81,20 +99,21 @@ h2 {
     background: #a93226;
     color: #fff;
     font-size: 16px;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
     margin-bottom: 10px;
 }
 
 .custom-file-upload:hover {
     background: #93211f;
+    transform: translateY(-2px);
 }
 
-/* Скрытый input для выбора файлов */
+/* Скрытый input */
 .upload-section input[type="file"] {
     display: none;
 }
 
-/* Отображение имени выбранного файла */
+/* Имя выбранного файла */
 .file-name {
     margin-bottom: 20px;
     font-size: 14px;
@@ -110,13 +129,14 @@ button {
     padding: 12px 20px;
     font-size: 16px;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
     outline: none;
     margin-bottom: 10px;
 }
 
 button:hover {
     background: #93211f;
+    transform: translateY(-2px);
 }
 
 /* Прогресс-бар */
@@ -159,6 +179,12 @@ button:hover {
     background: #2a2a2a;
     color: #cfcfcf;
     font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+.login-container input[type="text"]:focus,
+.login-container input[type="password"]:focus {
+    background: #333;
 }
 
 .login-container button[type="submit"] {
@@ -169,12 +195,13 @@ button:hover {
     padding: 12px;
     font-size: 16px;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
     outline: none;
 }
 
 .login-container button[type="submit"]:hover {
     background: #93211f;
+    transform: translateY(-2px);
 }
 
 .error {
@@ -188,11 +215,21 @@ button:hover {
     color: #a93226;
     text-decoration: none;
     font-size: 14px;
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .back-link:hover {
     color: #93211f;
+    transform: translateY(-2px);
+}
+
+.notification {
+    margin-top: 20px;
+    padding: 12px 20px;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
+    text-align: center;
 }
 
 /* Адаптивные стили */
@@ -201,7 +238,9 @@ button:hover {
         padding: 20px;
     }
 
-    button, .custom-file-upload, .auth-button {
+    button,
+    .custom-file-upload,
+    .auth-button {
         width: 100%;
     }
 }

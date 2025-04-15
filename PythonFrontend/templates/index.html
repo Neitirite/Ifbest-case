@@ -3,99 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Загрузка видео файлов</title> <!-- Подключаем шрифт Open Sans -->
+    <title>Загрузка видео файлов</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap" rel="stylesheet">
-    <!-- Подключение внешнего CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-<div class="container">
-    <!-- Навигация. Если пользователь авторизован (username присутствует в сессии), показываем одну кнопку с логином, иначе кнопки для авторизации и регистрации -->
-    <div class="nav">
-        {% if username %}
-            <a href="{{ url_for('logout') }}" class="auth-button">{{ username }}</a>
-        {% else %}
-            <a href="{{ url_for('login') }}" class="auth-button">Авторизация</a> <a href="{{ url_for('register') }}"
-                                                                                   class="auth-button">Регистрация</a>
-        {% endif %}
-    </div>
-
+<div class="container animated">
+    <div class="nav"> {% if username %} <span class="user-info">Привет, {{ username }}!</span>
+        <a href="{{ url_for('logout') }}" class="auth-button">Выход</a> {% else %}
+        <a href="{{ url_for('login') }}" class="auth-button">Авторизация</a>
+        <a href="{{ url_for('register') }}" class="auth-button">Регистрация</a> {% endif %} </div>
     <h2>Загрузка видео файлов</h2>
-    <div class="upload-section">
-        <!-- Кастомная кнопка "Обзор файлов" -->
-        <label for="videoInput" class="custom-file-upload">Обзор файлов</label>
-        <!-- Скрытый input для выбора файлов -->
-        <input type="file" id="videoInput" accept=".mp4,.mov,.wmv,.avi,.avchd,.flv,.swf,.f4v,.mkv,.webm">
-        <!-- Вывод выбранного имени файла -->
+    <div class="upload-section"><label for="videoInput" class="custom-file-upload">Обзор файлов</label> <input
+            type="file" id="videoInput" accept=".mp4,.mov,.wmv,.avi,.avchd,.flv,.swf,.f4v,.mkv,.webm">
         <div id="fileName" class="file-name">Файл не выбран</div>
-
-        <!-- Кнопка загрузки -->
         <button id="uploadBtn">Загрузить</button>
-        <!-- Прогресс-бар -->
         <div class="progress-bar" id="progressBar" style="display: none;">
             <div class="progress-bar-fill" id="progressBarFill"></div>
         </div>
     </div>
-    <!-- Список поддерживаемых форматов -->
-    <div class="supported-files">
-        Поддерживаемые форматы файлов: mp4, mov, wmv, avi, avchd, flv, swf, f4v, mkv, webm.
-    </div>
+    <div class="supported-files"> Поддерживаемые форматы файлов: mp4, mov, wmv, avi, avchd, flv, swf, f4v, mkv, webm.
+    </div> <!-- Кастомное уведомление -->
+    <div id="notification" class="notification" style="display: none;"></div>
 </div>
 
-<script>
-    // Отображение имени выбранного файла
-    document.getElementById('videoInput').addEventListener('change', function () {
-        var fileNameDisplay = document.getElementById('fileName');
-        if (this.files && this.files.length > 0) {
-            fileNameDisplay.textContent = this.files[0].name;
-        } else {
-            fileNameDisplay.textContent = 'Файл не выбран';
+<script> document.getElementById('videoInput').addEventListener('change', function () {
+    var fileNameDisplay = document.getElementById('fileName');
+    fileNameDisplay.textContent = (this.files && this.files.length > 0) ? this.files[0].name : 'Файл не выбран';
+});
+document.getElementById('uploadBtn').addEventListener('click', function () {
+    var fileInput = document.getElementById('videoInput');
+    var progressBar = document.getElementById('progressBar');
+    var progressBarFill = document.getElementById('progressBarFill');
+    if (fileInput.files.length === 0) {
+        showNotification('Пожалуйста, выберите файл для загрузки', true);
+        return;
+    }
+    var file = fileInput.files[0];
+    var formData = new FormData();
+    formData.append('video', file);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/upload', true);
+    xhr.upload.addEventListener('progress', function (e) {
+        if (e.lengthComputable) {
+            var percentComplete = (e.loaded / e.total) * 65;
+            progressBar.style.display = 'block';
+            progressBarFill.style.width = percentComplete + '%';
         }
     });
-
-    document.getElementById('uploadBtn').addEventListener('click', function () {
-        var fileInput = document.getElementById('videoInput');
-        var progressBar = document.getElementById('progressBar');
-        var progressBarFill = document.getElementById('progressBarFill');
-
-        if (fileInput.files.length === 0) {
-            alert('Пожалуйста, выберите файл для загрузки');
-            return;
-        }
-
-        var file = fileInput.files[0];
-        var formData = new FormData();
-        formData.append('video', file);
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/upload', true);
-
-        xhr.upload.addEventListener('progress', function (e) {
-            if (e.lengthComputable) {
-                var percentComplete = (e.loaded / e.total) * 100;
-                progressBar.style.display = 'block';
-                progressBarFill.style.width = percentComplete + '%';
-            }
-        });
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    alert('Файл успешно загружен!');
-                } else {
-                    try {
-                        var err = JSON.parse(xhr.responseText);
-                        alert('Ошибка при загрузке: ' + err.error);
-                    } catch (e) {
-                        alert('Ошибка при загрузке файла');
-                    }
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                simulateProcessing(function () {
+                    showNotification('Файл успешно загружен!', false);
+                });
+            } else {
+                try {
+                    var err = JSON.parse(xhr.responseText);
+                    showNotification('Ошибка при загрузке: ' + err.error, true);
+                } catch (e) {
+                    showNotification('Ошибка при загрузке файла', true);
                 }
             }
-        };
+        }
+    };
+    xhr.send(formData);
+});
 
-        xhr.send(formData);
-    });
-</script>
+function simulateProcessing(callback) {
+    var progressBarFill = document.getElementById('progressBarFill');
+    var currentWidth = parseFloat(progressBarFill.style.width) || 90;
+    var interval = setInterval(function () {
+        currentWidth += 1;
+        if (currentWidth >= 100) {
+            currentWidth = 100;
+            clearInterval(interval);
+            callback();
+        }
+        progressBarFill.style.width = currentWidth + '%';
+    }, 50);
+}
+
+function showNotification(message, isError) {
+    var notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.style.display = 'block';
+    if (isError) {
+        notification.style.backgroundColor = '#ff8080';
+    } else {
+        notification.style.backgroundColor = '#a93226';
+    }
+    setTimeout(function () {
+        notification.style.opacity = 1; // Плавное исчезновение уведомления
+        notification.style.transition = 'opacity 0.5s ease-out';
+        notification.style.opacity = 0;
+        setTimeout(function () {
+            notification.style.display = 'none';
+            notification.style.opacity = 1;
+        }, 500);
+    }, 6000);
+} </script>
 
 </body>
 </html>

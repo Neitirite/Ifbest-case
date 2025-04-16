@@ -18,12 +18,12 @@ docker run
 Разверните в Docker бд MySQL:
 ```
 docker run -d 
---name "MySQL" 
--p $HOST_PORT:3306 
--v "$(pwd)/$DATA_VOLUME":/var/lib/mysql
--e MYSQL_ROOT_PASSWORD="YourRootPassword" 
--e MYSQL_DATABASE="YourDataBase"
--e MYSQL_USER="YourUserName" //опционально
--e MYSQL_PASSWORD="YourUserPassword" //опционально
-mysql:latest
+   --name "MySQL" 
+   -p $HOST_PORT:3306 
+   -v "$(pwd)/$DATA_VOLUME":/var/lib/mysql
+   -e MYSQL_ROOT_PASSWORD="YourRootPassword" 
+   -e MYSQL_DATABASE="YourDataBase"
+   -e MYSQL_USER="YourUserName" //опционально
+   -e MYSQL_PASSWORD="YourUserPassword" //опционально
+   mysql:latest
 ```

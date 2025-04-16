@@ -111,8 +111,6 @@ def get_video_resolution(video_path):
 
 
 def tables_exists():
-    global COUNT
-
     cursor = conn.cursor()
 
     try:
@@ -135,7 +133,6 @@ def tables_exists():
             conn.commit()
 
     cursor.close()
-    COUNT += 1
 
 
 def user_exist(login):

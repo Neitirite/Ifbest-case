@@ -19,7 +19,7 @@ docker run
 ```
 docker run -d 
    --name "MySQL" 
-   -p $HOST_PORT:3306 
+   -p 3306:3306 
    -v "$(pwd)/$DATA_VOLUME":/var/lib/mysql
    -e MYSQL_ROOT_PASSWORD="YourRootPassword" 
    -e MYSQL_DATABASE="YourDataBase"

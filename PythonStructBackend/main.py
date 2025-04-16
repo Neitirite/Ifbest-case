@@ -65,7 +65,6 @@ class WebsocketClient:
             for extension in extensions:
                 server_total_coeff[server] += coefficients[extension]
 
-        print(server_total_coeff)
         self.send_data(min(server_total_coeff))
 
     def send_data(self, ws_server):
@@ -111,10 +110,38 @@ def get_video_resolution(video_path):
     return width, height
 
 
+def tables_exists():
+    global COUNT
+
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT 1 FROM users LIMIT 1")
+        cursor.fetchone()
+
+    except mysql.connector.Error as err:
+        if err.errno == 1146:
+            cursor.execute(
+                "CREATE TABLE users (id_user INT AUTO_INCREMENT PRIMARY KEY, login VARCHAR(50), password VARCHAR(255), registration_date DATE)")
+            conn.commit()
+    try:
+        cursor.execute("SELECT 1 FROM ID_video_Original_name LIMIT 1")
+        cursor.fetchone()
+
+    except mysql.connector.Error as err:
+        if err.errno == 1146:
+            cursor.execute(
+                "CREATE TABLE ID_video_Original_name (id INT AUTO_INCREMENT PRIMARY KEY, video_id int, user_login VARCHAR(50), original_video_name VARCHAR(255))")
+            conn.commit()
+
+    cursor.close()
+    COUNT += 1
+
+
 def user_exist(login):
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT login FROM user")
+        cursor.execute("SELECT login FROM video_host.users")
         result = cursor.fetchall()
 
         for user in result:
@@ -143,7 +170,7 @@ def register():
     try:
         cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO user (login, password, registration_date) VALUES (%s, %s, %s)",
+        cursor.execute("INSERT INTO users (login, password, registration_date) VALUES (%s, %s, %s)",
                        (login, password, datetime.datetime.now()))
         conn.commit()
 
@@ -168,7 +195,7 @@ def check_passwd():
     try:
         cursor = conn.cursor()
 
-        cursor.execute("SELECT password FROM user WHERE login = %s", (login,))
+        cursor.execute("SELECT password FROM users WHERE login = %s", (login,))
         hashed_password = cursor.fetchone()[0]
 
         return jsonify({"message": f"{hashed_password}"}), 201
@@ -187,11 +214,16 @@ def video_uploaded():
     try:
         cursor = conn.cursor()
 
-        cursor.execute("SELECT id_user FROM user WHERE login = %s", (user_login,))
+        cursor.execute("SELECT id_user FROM users WHERE login = %s", (user_login,))
         video_id += str(cursor.fetchone()[0])
 
         cursor.execute("SELECT * FROM ID_video_Original_name ORDER BY id DESC LIMIT 1")
-        video_id += str(cursor.fetchone()[0] + 1)
+        last_id_video = cursor.fetchone()
+
+        if last_id_video:  # Если не None
+            video_id += str(last_id_video[0] + 1)
+        else:
+            video_id += "1"
 
         cursor.execute(
             "INSERT INTO ID_video_Original_name (video_id, user_login, original_video_name) VALUES (%s, %s, %s)",
@@ -208,4 +240,5 @@ def video_uploaded():
 
 
 if __name__ == '__main__':
+    tables_exists()
     app.run(port=8012, debug=True)

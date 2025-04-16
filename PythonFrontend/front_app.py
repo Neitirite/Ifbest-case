@@ -4,11 +4,13 @@ from werkzeug.utils import secure_filename
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 import PythonStructBackend.config as config
-import mimetypes
-import io
+import dotenv
+
+dotenv_file = dotenv.find_dotenv()
+dotenv.load_dotenv(dotenv_file)
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "yandexlyceum_secret_key"  # в .env
+app.config['SECRET_KEY'] = os.getenv("FLASK_API_SECRET")
 
 ALLOWED_EXTENSIONS = {'mp4', 'mov', 'wmv', 'avi', 'avchd', 'flv', 'swf', 'f4v', 'mkv', 'webm'}
 

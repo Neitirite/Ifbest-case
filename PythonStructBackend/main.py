@@ -1,5 +1,4 @@
 import os
-import json
 from flask import Flask, request, jsonify
 import mysql.connector
 import datetime

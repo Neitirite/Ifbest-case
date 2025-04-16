@@ -2,7 +2,7 @@
 ## Установка
 ### 1. Установка MiniO
 1. Разверните в Docker хранилище MiniO:
-```
+```bash
 docker run 
    -p 9000:9000 
    -p 9001:9001 
@@ -16,14 +16,14 @@ docker run
 
 ### 2. Установка MySQL
 Разверните в Docker бд MySQL:
-```
+```bash
 docker run -d 
    --name "MySQL" 
    -p 3306:3306 
    -v "$(pwd)/$DATA_VOLUME":/var/lib/mysql
    -e MYSQL_ROOT_PASSWORD="YourRootPassword" 
    -e MYSQL_DATABASE="YourDataBase"
-   -e MYSQL_USER="YourUserName" //опционально
-   -e MYSQL_PASSWORD="YourUserPassword" //опционально
+   -e MYSQL_USER="YourUserName" #опционально
+   -e MYSQL_PASSWORD="YourUserPassword" #опционально
    mysql:latest
 ```

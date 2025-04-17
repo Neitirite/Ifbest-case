@@ -210,9 +210,11 @@ def video_uploaded():
 
     try:
         cursor = conn.cursor()
-
-        cursor.execute("SELECT id_user FROM users WHERE login = %s", (user_login,))
-        video_id += str(cursor.fetchone()[0])
+        if user_login == "guest":
+            video_id += "8"
+        else:
+            cursor.execute("SELECT id_user FROM users WHERE login = %s", (user_login,))
+            video_id += str(cursor.fetchone()[0])
 
         cursor.execute("SELECT * FROM ID_video_Original_name ORDER BY id DESC LIMIT 1")
         last_id_video = cursor.fetchone()

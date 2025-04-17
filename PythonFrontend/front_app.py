@@ -134,6 +134,7 @@ def upload():
         response = requests.post(f"{config.URL_API}/video_uploaded", json=data_to_request)
 
         if response.status_code == 200:
+            os.remove(f"{config.UPLOAD_FOLDER}/{original_name}")
             return jsonify({'message': 'Файл успешно загружен!'}), 200
 
         else:

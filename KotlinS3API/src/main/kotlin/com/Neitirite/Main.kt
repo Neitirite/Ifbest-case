@@ -6,6 +6,12 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.util.*
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.websocket.*
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.http.*
+import io.ktor.websocket.*
 
 
 val configFile = File("${System.getProperty("user.home")}/.config/s3API.conf")
@@ -17,20 +23,13 @@ fun loadConfig(configFile: File): Properties {
 }
 
 
-fun promptIfMissing(props: Properties, key: String, promptMessage: String) {
-    if (props.getProperty(key).isNullOrBlank()) {
-        print(promptMessage)
-        val input = readLine()
-        if (!input.isNullOrBlank()) {
-            props.setProperty(key, input.toString())
-        }
-    }
-}
-
-fun main() {
+suspend fun main() {
     val config = Properties()
     val videoDirectory = File("/video_files")
     val s3qFile = File("/video_files/queue/s3queue")
+    val client = HttpClient(CIO) {
+        install(WebSockets)
+    }
     if(!s3qFile.exists()){
         s3qFile.createNewFile()
     }
@@ -44,15 +43,11 @@ fun main() {
         println("Файл конфигурации ${configFile.absolutePath} не найден. Введите параметры вручную.")
     }
 
-    promptIfMissing(config, "endpoint", "endpoint: (http://ip:port) ")
-    promptIfMissing(config, "accessKey", "accessKey: ")
-    promptIfMissing(config, "secretKey", "secretKey: ")
-    promptIfMissing(config, "bucketName", "bucketName: ")
-
     val endpoint = config.getProperty("endpoint")
     val accessKey = config.getProperty("accessKey")
     val secretKey = config.getProperty("secretKey")
     val bucketName = config.getProperty("bucketName")
+    val apiServer = config.getProperty("structEndpoint")
 
     val minioClient = MinioClient.builder()
         .endpoint(endpoint.split(":").first(), endpoint.split(":").last().toInt(), false)
@@ -92,8 +87,18 @@ fun main() {
                                 .`object`(objectName)
                                 .build()
                         )
-                        println(linkToObject)
-                       //Сделать отправку на бэкенд id и ссылки на файл в S3
+
+                        client.webSocket(
+                            method = HttpMethod.Get,
+                            host = apiServer.split(':').first(),
+                            port = apiServer.split(':').last().toInt(),
+                            path = "/"
+                        ) {
+                            println("Подключение установлено")
+
+                            send(Frame.Text("{\"${objectName.split(".").first()}\": \"${linkToObject}\"}"))
+                            println("Sent: {\"${objectName.split(".").first()}\": \"${linkToObject}\"}")
+                        }
                     }
 
                 }
